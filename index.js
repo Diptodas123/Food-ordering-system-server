@@ -13,7 +13,7 @@ app.use(cors());
 
 
 //routes
-app.use("/api/auth",authRouter);
+app.use("/api/auth", authRouter);
 
 connectDB(process.env.DB_USERNAME, process.env.DB_PASSWORD);
 
