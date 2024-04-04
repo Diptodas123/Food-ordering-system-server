@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import connectDB from "./database/db.js";
 import authRouter from "./routes/authRoute.js";
+import restaurantRouter from "./routes/restaurantRoute.js";
 
 const app = express();
 dotenv.config();
@@ -14,6 +15,7 @@ app.use(cors());
 
 //routes
 app.use("/api/auth", authRouter);
+app.use("/api/restaurant", restaurantRouter);
 
 connectDB(process.env.DB_USERNAME, process.env.DB_PASSWORD);
 

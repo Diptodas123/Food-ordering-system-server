@@ -73,7 +73,10 @@ const login = async (req, res) => {
 
         success = true;
 
-        return res.status(200).json({ success, message: "Login successful", authToken, user });
+        //delete password from response
+        const { password, ...others } = user._doc;
+
+        return res.status(200).json({ success, message: "Login successful", authToken, user: others });
 
     } catch (error) {
         console.log(error.message);
