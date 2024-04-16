@@ -59,11 +59,11 @@ const restaurantShema = mongoose.Schema({
         type: String,
         required: true
     },
-    images: {
+    imgUrls: {
         type: Array,
         required: true
     },
-    menu: {
+    menuUrl: {
         type: String,
         required: true
     }
