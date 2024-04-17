@@ -80,7 +80,54 @@ const login = async (req, res) => {
 
     } catch (error) {
         console.log(error.message);
-        res.status(500).send({ message: "Internal Server Error", error: error.message });
+        res.status(500).json({ message: "Internal Server Error", error: error.message });
     }
 }
-export default { signup, login };
+
+const googleAuth = async (req, res) => {
+    try {
+        let success = false;
+
+        //check whether the user with this email exists
+        let user = await User.findOne({ email: req.body.email });
+        if (user) {
+
+            //create jwt token
+            const payload = {
+                id: user._id
+            };
+
+            const authToken = jwt.sign(payload, process.env.JWT_SECRET);
+            const { password, ...others } = user._doc;
+            return res.status(200).json({ success: true, authToken, user: others });
+        } else {
+            const generatePassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
+            const salt = await bcrypt.genSalt(10);
+            const securedPassword = await bcrypt.hash(generatePassword, salt);
+
+            //create a new user
+            user = await User.create({
+                firstName: req.body.firstName,
+                lastName: req.body.lastName,
+                email: req.body.email,
+                phone: Math.floor(1000000000 + Math.random() * 9000000000),
+                password: securedPassword,
+                image: req.body.photo
+            });
+
+            success = true;
+            const payload = {
+                id: user._id
+            };
+            const authToken = jwt.sign(payload, process.env.JWT_SECRET);
+            const { password, ...others } = user._doc;
+            return res.status(200).json({ success: true, authToken, user: others });
+        }
+
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
+}
+
+export default { signup, login, googleAuth };

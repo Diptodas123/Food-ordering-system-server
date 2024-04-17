@@ -17,4 +17,6 @@ router.post("/login", [
     body("password", "Password must be atleast 8 characters long").isLength({ min: 8 }),
 ], authController.login);
 
+router.post("/google", authController.googleAuth);
+
 export default router;
