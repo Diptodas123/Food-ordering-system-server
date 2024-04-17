@@ -1,10 +1,10 @@
 import express from "express";
-import {body} from "express-validator";
+import { body } from "express-validator";
 import restaurantController from "../controllers/restaurantController.js";
 
 const router = express.Router();
 
-router.post("/registration",[
+router.post("/registration", [
     body("name", "Enter a valid name").isLength({ min: 3 }),
     body("address", "Enter address").exists(),
     body("city", "Enter city").exists(),
@@ -22,5 +22,10 @@ router.post("/registration",[
     body("menuUrl", "Menu is required").exists(),
     body("imgUrls", "Image is required").exists(),
 ], restaurantController.register);
+
+router.post("/login", [
+    body("email", "Enter a valid email").isEmail(),
+    body("password", "Password must be atleast 8 characters long").isLength({ min: 8 }),
+], restaurantController.login);
 
 export default router;
