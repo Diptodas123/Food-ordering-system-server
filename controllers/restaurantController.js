@@ -1,7 +1,7 @@
 import Restaurant from "../schema/restaurantSchema.js";
 import { validationResult } from "express-validator";
 import bcrypt from "bcrypt";
-
+import { Types } from "mongoose";
 const register = async (req, res) => {
 
     const errors = validationResult(req);
@@ -83,4 +83,21 @@ const login = async (req, res) => {
     }
 }
 
-export default { register, login };
+const getRestaurant = async (req, res) => {
+
+    try {
+        let success = false;
+        const id = new Types.ObjectId(req.params.id);
+        const restaurant = await Restaurant.findById(id);
+        if (!restaurant) {
+            return res.status(404).json({ success, message: "Restaurant not found" });
+        }
+
+        success = true;
+        return res.status(200).json({ success, restaurant });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
+}
+export default { register, login, getRestaurant };

@@ -28,4 +28,6 @@ router.post("/login", [
     body("password", "Password must be atleast 8 characters long").isLength({ min: 8 }),
 ], restaurantController.login);
 
+router.get("/getRestaurant/:id", restaurantController.getRestaurant);
+
 export default router;
