@@ -2,6 +2,7 @@ import Restaurant from "../schema/restaurantSchema.js";
 import { validationResult } from "express-validator";
 import bcrypt from "bcrypt";
 import { Types } from "mongoose";
+import Review from "../schema/reviewSchema.js";
 const register = async (req, res) => {
 
     const errors = validationResult(req);
@@ -100,4 +101,24 @@ const getRestaurant = async (req, res) => {
         return res.status(500).json({ message: "Internal Server Error", error: error.message });
     }
 }
-export default { register, login, getRestaurant };
+
+const postReview = async (req, res) => {
+    const errors = ValidationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array()[0].msg });
+    }
+    try {
+        let success = false;
+
+        const review = await Review.create({
+            restaurant: req.params.id,
+            user: req.user.id,
+            comment: req.body.comment,
+            rating: req.body.rating
+        });
+    }catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Internal Server Error", error: error.message });
+}
+}
+export default { register, login, getRestaurant, postReview };

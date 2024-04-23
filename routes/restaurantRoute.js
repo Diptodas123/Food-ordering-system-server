@@ -30,4 +30,10 @@ router.post("/login", [
 
 router.get("/getRestaurant/:id", restaurantController.getRestaurant);
 
+
+router.post("/postReview", [
+    body("comment", "Enter a valid comment").isLength({ min: 3 }),
+    body("rating", "Enter a valid rating").isLength({ min: 1, max: 5 }),
+], restaurantController.postReview);
+
 export default router;

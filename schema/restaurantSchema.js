@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 
 const restaurantShema = mongoose.Schema({
     name: {
@@ -68,8 +68,8 @@ const restaurantShema = mongoose.Schema({
         required: true
     },
     rating: {
-        type: Number,
-        default: 0
+        type: Types.ObjectId,
+        ref: "Review",
     },
     reviews: {
         type: Number,
