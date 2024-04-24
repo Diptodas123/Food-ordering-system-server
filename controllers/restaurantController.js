@@ -89,13 +89,14 @@ const getRestaurant = async (req, res) => {
     try {
         let success = false;
         const id = new Types.ObjectId(req.params.id);
-        const restaurant = await Restaurant.findById(id);
+        let restaurant = await Restaurant.findById(id);
+        const reviews = await Review.find({ restaurant: id }).populate("user");
         if (!restaurant) {
             return res.status(404).json({ success, message: "Restaurant not found" });
         }
 
         success = true;
-        return res.status(200).json({ success, restaurant });
+        return res.status(200).json({ success, restaurant, reviews });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: "Internal Server Error", error: error.message });
@@ -103,7 +104,7 @@ const getRestaurant = async (req, res) => {
 }
 
 const postReview = async (req, res) => {
-    const errors = ValidationResult(req);
+    const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array()[0].msg });
     }
@@ -112,13 +113,17 @@ const postReview = async (req, res) => {
 
         const review = await Review.create({
             restaurant: req.params.id,
-            user: req.user.id,
+            user: req.body.user,
             comment: req.body.comment,
-            rating: req.body.rating
+            rating: req.body.rating,
+            image: req.body.image
         });
-    }catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: "Internal Server Error", error: error.message });
-}
+
+        success = true;
+        return res.status(200).json({ success, review });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
 }
 export default { register, login, getRestaurant, postReview };
