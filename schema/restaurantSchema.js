@@ -71,10 +71,6 @@ const restaurantShema = mongoose.Schema({
         type: Types.ObjectId,
         ref: "Review",
     },
-    reviews: {
-        type: Number,
-        default: 0
-    }
 }, { timestamps: true });
 
 const restaurantModel = mongoose.model("restaurant", restaurantShema);

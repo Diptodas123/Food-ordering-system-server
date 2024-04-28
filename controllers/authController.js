@@ -130,4 +130,35 @@ const googleAuth = async (req, res) => {
     }
 }
 
-export default { signup, login, googleAuth };
+const updateProfile = async (req, res) => {
+    try {
+        let success = false;
+        if (!req.user) {
+            return res.status(400).json({ success, message: "Please login to update your profile" });
+        }
+
+        if (req.body.password) {
+            const salt = await bcrypt.genSalt(10);
+            req.body.password = await bcrypt.hash(req.body.password, salt);
+        }
+
+        const user = await User.findByIdAndUpdate(req.user.id, {
+            $set: {
+                firstName: req.body.fname,
+                lastName: req.body.lname,
+                email: req.body.email,
+                phone: req.body.phone,
+                password: req.body.password,
+                image: req.body.image
+            }
+        }, { new: true });
+
+        success = true;
+        return res.status(200).json({ success, message: "Profile updated successfully", user });
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
+}
+
+export default { signup, login, googleAuth, updateProfile };
