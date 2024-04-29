@@ -137,12 +137,18 @@ const updateProfile = async (req, res) => {
             return res.status(400).json({ success, message: "Please login to update your profile" });
         }
 
+        let user = await User.findOne({ email: req.body.email });
+
+        if (user) {
+            return res.status(400).json({ success, message: "Sorry a user with this email already exists" });
+        }
+
         if (req.body.password) {
             const salt = await bcrypt.genSalt(10);
             req.body.password = await bcrypt.hash(req.body.password, salt);
         }
 
-        const user = await User.findByIdAndUpdate(req.user.id, {
+        user = await User.findByIdAndUpdate(req.user.id, {
             $set: {
                 firstName: req.body.fname,
                 lastName: req.body.lname,
