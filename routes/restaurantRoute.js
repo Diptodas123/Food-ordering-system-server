@@ -29,7 +29,7 @@ router.post("/login", [
 ], restaurantController.login);
 
 router.get("/getRestaurant/:id", restaurantController.getRestaurant);
-
+router.get("getallRestaurants", restaurantController.getallRestaurants);
 
 router.post("/postReview/:id", [
     body("comment", "Enter a valid comment").isLength({ min: 3 }),

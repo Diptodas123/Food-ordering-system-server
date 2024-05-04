@@ -28,4 +28,6 @@ router.post("/update-profile", [
     body("password", "Password must be atleast 8 characters long").isLength({ min: 8 }),
 ], fetchUser, authController.updateProfile);
 
+router.get("/getallusers", authController.getAllUsers);
+
 export default router;

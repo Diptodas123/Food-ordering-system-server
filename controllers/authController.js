@@ -167,4 +167,14 @@ const updateProfile = async (req, res) => {
     }
 }
 
-export default { signup, login, googleAuth, updateProfile };
+const getAllUsers = async (req, res) => {
+    try {
+        const users = await User.find({});
+        return res.status(200).json({ success: true, message: "All users", users });
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
+}
+
+export default { signup, login, googleAuth, updateProfile, getAllUsers };
