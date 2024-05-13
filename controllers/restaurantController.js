@@ -107,8 +107,21 @@ const getallRestaurants = async (req, res) => {
     try {
         let success = false;
         const restaurants = await Restaurant.find();
+        const rating = await Review.aggregate([
+            {
+                $group: {
+                    _id: "$restaurant",
+                    avgRating: { $avg: "$rating" }
+                }
+            }
+        ]);
+
+        if (!restaurants) {
+            return res.status(404).json({ success, message: "Restaurants not found" });
+        }
+
         success = true;
-        return res.status(200).json({ success, restaurants });
+        return res.status(200).json({ success, restaurants, rating });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: "Internal Server Error", error: error.message });
