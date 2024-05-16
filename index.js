@@ -4,6 +4,7 @@ import cors from "cors";
 import connectDB from "./database/db.js";
 import authRouter from "./routes/authRoute.js";
 import restaurantRouter from "./routes/restaurantRoute.js";
+import contactRouter from "./routes/contactRoute.js";
 
 const app = express();
 dotenv.config();
@@ -16,6 +17,7 @@ app.use(cors());
 //routes
 app.use("/api/auth", authRouter);
 app.use("/api/restaurant", restaurantRouter);
+app.use("/api/contact", contactRouter);
 
 connectDB(process.env.DB_USERNAME, process.env.DB_PASSWORD);
 
