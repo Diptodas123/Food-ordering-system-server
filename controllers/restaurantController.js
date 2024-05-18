@@ -3,6 +3,7 @@ import { validationResult } from "express-validator";
 import bcrypt from "bcrypt";
 import { Types } from "mongoose";
 import Review from "../schema/reviewSchema.js";
+import FoodItem from "../schema/foodItemSchema.js";
 const register = async (req, res) => {
 
     const errors = validationResult(req);
@@ -91,12 +92,13 @@ const getRestaurant = async (req, res) => {
         const id = new Types.ObjectId(req.params.id);
         let restaurant = await Restaurant.findById(id);
         const reviews = await Review.find({ restaurant: id }).populate("user");
+        const foodItems = await FoodItem.find({ restaurant: id });
         if (!restaurant) {
             return res.status(404).json({ success, message: "Restaurant not found" });
         }
 
         success = true;
-        return res.status(200).json({ success, restaurant, reviews });
+        return res.status(200).json({ success, restaurant, reviews, foodItems });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: "Internal Server Error", error: error.message });
@@ -106,7 +108,14 @@ const getRestaurant = async (req, res) => {
 const getallRestaurants = async (req, res) => {
     try {
         let success = false;
-        const restaurants = await Restaurant.find();
+        let restaurants = await Restaurant.find();
+        restaurants = await Promise.all(restaurants.map(async (restaurant) => {
+            return {
+                ...restaurant._doc,
+                foodItems: await FoodItem.find({ restaurant: restaurant._id })
+            }
+        }));
+
         const rating = await Review.aggregate([
             {
                 $group: {
@@ -128,6 +137,37 @@ const getallRestaurants = async (req, res) => {
     }
 }
 
+const addFoodItem = async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array()[0].msg });
+    }
+
+    try {
+        let success = false;
+
+        const id = new Types.ObjectId(req.params.id);
+        const restaurant = await Restaurant.findById(id);
+        if (!restaurant) {
+            return res.status(404).json({ success, message: "Restaurant not found" });
+        }
+
+        const foodItem = await FoodItem.create({
+            name: req.body.name,
+            image: req.body.image,
+            description: req.body.description,
+            price: req.body.price,
+            category: req.body.category,
+            restaurant: req.params.id
+        });
+
+        success = true;
+        return res.status(200).json({ message: "Food item added successfully", success, foodItem });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
+}
 const postReview = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -151,4 +191,4 @@ const postReview = async (req, res) => {
         return res.status(500).json({ message: "Internal Server Error", error: error.message });
     }
 }
-export default { register, login, getRestaurant, getallRestaurants, postReview };
+export default { register, login, getRestaurant, getallRestaurants, postReview, addFoodItem };

@@ -36,4 +36,17 @@ router.post("/postReview/:id", [
     body("rating", "Enter a valid rating").isLength({ min: 1, max: 5 }),
 ], restaurantController.postReview);
 
+router.post("/addfooditem/:id", [
+    body("name", "Enter a valid name").isLength({ min: 3 }),
+    body("image", "Please upload an image").exists(),
+    body("price", "Enter a valid price").custom((value) => {
+        if (value <= 0) {
+            throw new Error("Price cannot be zero or negative");
+        }
+        return true;
+    }),
+    body("description", "Enter a valid description").isLength({ min: 5 }),
+    body("category", "Category is required").exists()
+], restaurantController.addFoodItem);
+
 export default router;
