@@ -168,6 +168,24 @@ const addFoodItem = async (req, res) => {
         return res.status(500).json({ message: "Internal Server Error", error: error.message });
     }
 }
+
+const getAllFoodItems = async (req, res) => {
+
+    try {
+        let success = false;
+        const foodItems = await FoodItem.find().populate("restaurant").sort({ createdAt: -1 });
+        if (!foodItems) {
+            return res.status(404).json({ success, message: "Food items not found" });
+        }
+
+        success = true;
+        return res.status(200).json({ success, foodItems });
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
+}
 const postReview = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -191,4 +209,4 @@ const postReview = async (req, res) => {
         return res.status(500).json({ message: "Internal Server Error", error: error.message });
     }
 }
-export default { register, login, getRestaurant, getallRestaurants, postReview, addFoodItem };
+export default { register, login, getRestaurant, getallRestaurants, postReview, addFoodItem, getAllFoodItems };

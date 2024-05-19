@@ -49,4 +49,7 @@ router.post("/addfooditem/:id", [
     body("category", "Category is required").exists()
 ], restaurantController.addFoodItem);
 
+
+router.get("/getAllFoodItems", restaurantController.getAllFoodItems);
+
 export default router;
