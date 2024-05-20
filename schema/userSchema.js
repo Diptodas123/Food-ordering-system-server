@@ -21,37 +21,28 @@ const userSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    image:{
+    image: {
         type: String,
         default: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
     },
     favourite: {
-        type: Object,
-        default: { items: [], restaurants: [] }
+        type: Array,
+        default: [{ items: [], restaurants: [] }]
     },
     cart: {
         type: Array,
         default: []
     },
     address: {
-        type: Object,
-        default: {
-            address: [{
-                addressLine: String,
-                landmark: String,
-                city: String,
-                state: String,
-                country: String,
-                pincode: String
-            }]
-        }
+        type: Array,
+        default: []
     },
     coupon: {
-        type: Object,
-        default: {
+        type: Array,
+        default: [{
             code: "WELCOME",
             discount: 50,
-        }
+        }]
     }
 }, { timestamps: true });
 
