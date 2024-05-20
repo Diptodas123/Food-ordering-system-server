@@ -30,4 +30,8 @@ router.post("/update-profile", [
 
 router.get("/getallusers", authController.getAllUsers);
 
+router.post("/verifyCoupon/:id", [
+    body("coupon", "Enter a valid coupon code").isLength({ min: 3 }),
+], authController.verifyCoupon);
+
 export default router;

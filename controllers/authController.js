@@ -1,5 +1,6 @@
 import User from "../schema/userSchema.js";
 import bcrypt from "bcrypt";
+import { Types } from "mongoose";
 import jwt from "jsonwebtoken";
 import { validationResult } from "express-validator";
 
@@ -177,4 +178,31 @@ const getAllUsers = async (req, res) => {
     }
 }
 
-export default { signup, login, googleAuth, updateProfile, getAllUsers };
+const verifyCoupon = async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array()[0].msg });
+    }
+    try {
+        let success = false;
+        const id = new Types.ObjectId(req.params.id)
+        const user = await User.findById(id);
+
+        if (!user) {
+            return res.status(404).json({ success, message: "User not found" });
+        }
+
+        const validCoupon = req.body.coupon === user.coupon.code ? true : false;
+
+        if (!validCoupon) {
+            return res.status(400).json({ success, message: "Invalid coupon" });
+        }
+
+        success = true;
+        return res.status(200).json({ discount: user.coupon.discount, success, message: "Coupon applied with discount of " + user.coupon.discount + "%" });
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
+}
+export default { signup, login, googleAuth, updateProfile, getAllUsers, verifyCoupon };
