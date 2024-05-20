@@ -3,6 +3,7 @@ import { validationResult } from "express-validator";
 import bcrypt from "bcrypt";
 import { Types } from "mongoose";
 import Review from "../schema/reviewSchema.js";
+import jwt from "jsonwebtoken";
 import FoodItem from "../schema/foodItemSchema.js";
 const register = async (req, res) => {
 
@@ -78,7 +79,7 @@ const login = async (req, res) => {
 
         const token = jwt.sign(payload, process.env.JWT_SECRET);
         success = true;
-        return res.status(200).json({ success, token });
+        return res.status(200).json({ success, token, id: restaurant._id });
     } catch (err) {
         console.log(err);
         return res.status(500).json({ message: "Internal Server Error", error: err.message });
