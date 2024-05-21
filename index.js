@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import bodyParser from "body-parser";
 import connectDB from "./database/db.js";
 import authRouter from "./routes/authRoute.js";
 import restaurantRouter from "./routes/restaurantRoute.js";
@@ -14,6 +15,7 @@ const PORT = 8000;
 
 //middleware
 app.use(express.json());
+app.use(bodyParser.json());
 app.use(cors());
 app.use("/webhook", webHookMiddleware);
 
