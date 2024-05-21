@@ -1,7 +1,7 @@
 import Stripe from "stripe";
 
 const generatePayment = async (req, res, next) => {
-    const { cartItems, deliveryCharge, discount } = req.body;
+    const { cartItems, deliveryCharge, discount, totalAmount } = req.body;
     try {
         const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -35,7 +35,7 @@ const generatePayment = async (req, res, next) => {
             payment_method_types: ["card"],
             line_items,
             mode: "payment",
-            success_url: `${process.env.CLIENT_URL}/success`,
+            success_url: `${process.env.CLIENT_URL}/success?q=${totalAmount}`,
             cancel_url: `${process.env.CLIENT_URL}/cancel`,
         });
 
