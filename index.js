@@ -1,32 +1,29 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import bodyParser from "body-parser";
 import connectDB from "./database/db.js";
 import authRouter from "./routes/authRoute.js";
 import restaurantRouter from "./routes/restaurantRoute.js";
 import contactRouter from "./routes/contactRoute.js";
 import orderRouter from "./routes/orderRoute.js";
-import webHookMiddleware from "./middleware/webHook.js"
+import webHookRouter from "./middleware/webHook.js";
 
-const app = express();
 dotenv.config();
+const app = express();
 const PORT = 8000;
 
-//middleware
-app.use(express.json());
-app.use(bodyParser.json());
-app.use(cors());
-app.use("/webhook", webHookMiddleware);
+connectDB(process.env.DB_USERNAME, process.env.DB_PASSWORD);
 
-//routes
+app.use(cors());
+app.use(express.json());
+
 app.use("/api/auth", authRouter);
 app.use("/api/restaurant", restaurantRouter);
 app.use("/api/contact", contactRouter);
 app.use("/api/order", orderRouter);
+app.use("/webhook", webHookRouter);
 
-connectDB(process.env.DB_USERNAME, process.env.DB_PASSWORD);
-
+// Start the server
 app.listen(PORT, () => {
-    console.log(`server is running at port ${PORT}`)
+    console.log(`Server is running at port ${PORT}`);
 });
