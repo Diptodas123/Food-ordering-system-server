@@ -6,6 +6,7 @@ import authRouter from "./routes/authRoute.js";
 import restaurantRouter from "./routes/restaurantRoute.js";
 import contactRouter from "./routes/contactRoute.js";
 import orderRouter from "./routes/orderRoute.js";
+import webHookMiddleware from "./middleware/webHook.js"
 
 const app = express();
 dotenv.config();
@@ -14,6 +15,7 @@ const PORT = 8000;
 //middleware
 app.use(express.json());
 app.use(cors());
+app.use("/webhook", webHookMiddleware);
 
 //routes
 app.use("/api/auth", authRouter);

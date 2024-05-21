@@ -32,7 +32,9 @@ const orderSchema = new Schema({
     },
     transactionId: {
         type: String,
-        required: true
+    },
+    sessionId: {
+        type: String,
     }
 }, { timestamps: true });
 

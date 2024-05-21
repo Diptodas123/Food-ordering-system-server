@@ -192,14 +192,14 @@ const verifyCoupon = async (req, res) => {
             return res.status(404).json({ success, message: "User not found" });
         }
 
-        const validCoupon = req.body.coupon === user.coupon.code ? true : false;
+        const validCoupon = user.coupon.find((coupon) => coupon.code === req.body.coupon);
 
         if (!validCoupon) {
             return res.status(400).json({ success, message: "Invalid coupon" });
         }
 
         success = true;
-        return res.status(200).json({ discount: user.coupon.discount, success, message: "Coupon applied with discount of " + user.coupon.discount + "%" });
+        return res.status(200).json({ discount: validCoupon.discount, success, message: "Coupon applied with discount of " + validCoupon.discount + "% of 100 Rs" });
     } catch (error) {
         console.log(error.message);
         return res.status(500).json({ message: "Internal Server Error", error: error.message });
