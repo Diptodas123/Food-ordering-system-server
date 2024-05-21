@@ -1,11 +1,12 @@
 import { Router } from "express";
+import express from "express";
 import Stripe from "stripe";
 import Order from "../schema/orderSchema.js";
 
 const router = Router();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-router.post("/stripe", async (req, res) => {
+router.post("/stripe", express.raw({ type: 'application/json' }), async (req, res) => {
     const sig = req.headers["stripe-signature"];
 
     let event;
