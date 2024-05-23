@@ -1,7 +1,7 @@
 import Stripe from "stripe";
 
 const generatePayment = async (req, res, next) => {
-    const { cartItems, deliveryCharge, discount, totalAmount } = req.body;
+    const { user, cartItems, deliveryCharge, discount, totalAmount, address, restaurant } = req.body;
     try {
         const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -37,10 +37,17 @@ const generatePayment = async (req, res, next) => {
             mode: "payment",
             success_url: `${process.env.CLIENT_URL}/success?q=${totalAmount}`,
             cancel_url: `${process.env.CLIENT_URL}/cancel`,
+            metadata: {
+                userId: user._id,
+                restaurantId: restaurant._id,
+                address,
+                cartItems: JSON.stringify(cartItems),
+                totalAmount
+            }
         });
 
         req.sessionId = session.id;
-        next();
+        res.json({ id: session.id });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ error: "Internal Server Error" });
