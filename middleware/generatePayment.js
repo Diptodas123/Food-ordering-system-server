@@ -1,46 +1,49 @@
-import { Router } from "express";
-import express from "express";
 import Stripe from "stripe";
-import Order from "../schema/orderSchema.js";
 
-const router = Router();
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-
-// Webhook route with raw body parser middleware
-router.post("/stripe", express.raw({ type: 'application/json' }), async (req, res) => {
-    const sig = req.headers["stripe-signature"];
-    let event;
-
+const generatePayment = async (req, res, next) => {
+    const { cartItems, deliveryCharge, discount, totalAmount } = req.body;
     try {
-        // Construct the event using the raw body
-        event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
-    } catch (err) {
-        console.error('Error verifying Stripe webhook signature:', err.message);
-        return res.status(400).send(`Webhook Error: ${err.message}`);
-    }
+        const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-    // Handle the event
-    if (event.type === "checkout.session.completed") {
-        const session = event.data.object;
-
-        try {
-            // Update the order with the transaction ID
-            const order = await Order.findOneAndUpdate(
-                { sessionId: session.id },
-                { transactionId: session.payment_intent },
-                { new: true }
-            );
-            if (order) {
-                console.log(`Order updated with transaction ID: ${session.payment_intent}`);
-            } else {
-                console.log(`Order not found for session ID: ${session.id}`);
+        const line_items = cartItems.map((item) => {
+            return {
+                price_data: {
+                    currency: "inr",
+                    product_data: {
+                        name: item.name,
+                        images: [item.image]
+                    },
+                    unit_amount: item.price * 100
+                },
+                quantity: item.quantity
             }
-        } catch (err) {
-            console.error('Error updating order:', err);
-        }
+        });
+
+        line_items.push({
+            price_data: {
+                currency: "inr",
+                product_data: {
+                    name: "Delivery Charge",
+                    images: ["https://www.newlivingconcept.com/image/newlivingconcept/image/data/all_product_images/product-594/jOmFWoNo1631522288.png"]
+                },
+                unit_amount: discount > 0 ? (deliveryCharge - discount) * 100 : deliveryCharge * 100
+            },
+            quantity: 1
+        });
+
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ["card"],
+            line_items,
+            mode: "payment",
+            success_url: `${process.env.CLIENT_URL}/success?q=${totalAmount}`,
+            cancel_url: `${process.env.CLIENT_URL}/cancel`,
+        });
+
+        req.sessionId = session.id;
+        next();
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: "Internal Server Error" });
     }
-
-    res.status(200).end();
-});
-
-export default router;
+}
+export default generatePayment;
