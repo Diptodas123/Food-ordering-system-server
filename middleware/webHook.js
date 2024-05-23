@@ -17,7 +17,7 @@ router.post("/stripe", bodyParser.raw({ type: 'application/json' }), async (req,
     try {
         event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
     } catch (err) {
-        console.log(`Webhook signature verification failed.`, err.message);
+        console.log(`⚠️  Webhook signature verification failed.`, err.message);
         return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
@@ -26,32 +26,33 @@ router.post("/stripe", bodyParser.raw({ type: 'application/json' }), async (req,
         case 'checkout.session.completed':
             const session = event.data.object;
 
-            // Fetch the order details from session metadata if necessary
-            const { userId, restaurantId, address, cartItems, totalAmount } = session.metadata;
+            // Retrieve the temporary order using the order ID from metadata
+            const orderId = session.metadata.orderId;
 
             try {
-                // Create the order in the database
-                const order = await Order.create({
-                    user: userId,
-                    restaurant: restaurantId,
-                    address,
-                    foodItems: cartItems,
-                    totalAmount,
-                    sessionId: session.id
-                });
+                const order = await Order.findById(orderId);
+
+                if (!order) {
+                    console.error("Order not found:", orderId);
+                    return res.status(404).send("Order not found");
+                }
+
+                // Update the order status to confirmed
+                order.status = "confirmed";
+                await order.save();
 
                 // Send confirmation email
-                sendBillThroughEmail(user.email, {
-                    user: { _id: userId, email: user.email },
-                    restaurant: { _id: restaurantId },
-                    address,
-                    cartItems,
-                    totalAmount
+                sendBillThroughEmail(order.user.email, {
+                    user: { _id: order.user, email: order.user.email },
+                    restaurant: { _id: order.restaurant },
+                    address: order.address,
+                    cartItems: order.foodItems,
+                    totalAmount: order.totalAmount
                 });
 
                 console.log("Order placed successfully");
             } catch (error) {
-                console.error("Error placing order: ", error);
+                console.error("Error updating order: ", error);
             }
             break;
         default:
