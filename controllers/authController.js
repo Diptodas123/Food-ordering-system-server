@@ -221,7 +221,7 @@ const getAllOrders = async (req, res) => {
         const userId = new Types.ObjectId(req.user)
 
         const orders = await Order.find({ user: userId }).populate("restaurant", "name address imgUrls").populate("user", "firstName lastName");
-        console.log(orders);
+
         if (!orders) {
             return res.status(404).json({ success, message: "User not found" });
         }
@@ -235,4 +235,111 @@ const getAllOrders = async (req, res) => {
     }
 }
 
-export default { signup, login, googleAuth, updateProfile, getAllUsers, verifyCoupon, getAllOrders };
+const addAddress = async (req, res) => {
+    if (!req.user) {
+        return res.status(400).json({ success, message: "Please login to add address" });
+    }
+
+    try {
+        let success = false;
+
+        const userId = new Types.ObjectId(req.user);
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ success, message: "User not found" });
+        }
+
+        const address = {
+            type: req.body.type,
+            address: req.body.address,
+        }
+
+        user.address.push(address);
+        await user.save();
+        success = true;
+        return res.status(200).json({ success, message: "Address added successfully", user });
+
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
+}
+
+
+const updateAddress = async (req, res) => {
+    if(!req.user){
+        return res.status(400).json({ success, message: "Please login to update address" });
+    }
+
+    try {
+        let success = false;
+
+        const userId = new Types.ObjectId(req.user);
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ success, message: "User not found" });
+        }
+
+        user.address[req.params.index].type = req.body.type;
+        user.address[req.params.index].address = req.body.address;
+        await user.save();
+        success = true;
+        return res.status(200).json({ success, message: "Address updated successfully", user });
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
+}
+
+const deleteAddress = async (req, res) => {
+    if (!req.user) {
+        return res.status(400).json({ success, message: "Please login to delete address" });
+    }
+
+    try {
+        let success = false;
+
+        const userId = new Types.ObjectId(req.user);
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ success, message: "User not found" });
+        }
+
+        user.address.splice(req.params.index, 1);
+        await user.save();
+        success = true;
+        return res.status(200).json({ success, message: "Address deleted successfully", user });
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
+}
+
+const getAllAddress = async (req, res) => {
+    if (!req.user) {
+        return res.status(400).json({ success, message: "Please login to get address" });
+    }
+
+    try {
+        let success = false;
+
+        const userId = new Types.ObjectId(req.user);
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ success, message: "User not found" });
+        }
+
+        success = true;
+        return res.status(200).json({ success, address: user.address });
+
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
+}
+
+export default { signup, login, googleAuth, updateProfile, getAllUsers, verifyCoupon, getAllOrders, addAddress, updateAddress, deleteAddress, getAllAddress };
