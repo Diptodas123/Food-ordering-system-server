@@ -20,7 +20,7 @@ router.post("/login", [
 
 router.post("/google", authController.googleAuth);
 
-router.post("/update-profile", [
+router.patch("/update-profile", [
     body("fname", "Enter a valid first name").isLength({ min: 3 }),
     body("lname", "Enter a valid last name").isLength({ min: 3 }),
     body("email", "Enter a valid email").isEmail(),
@@ -33,5 +33,7 @@ router.get("/getallusers", authController.getAllUsers);
 router.post("/verifyCoupon/:id", [
     body("coupon", "Enter a valid coupon code").isLength({ min: 3 }),
 ], authController.verifyCoupon);
+
+router.get("/getAllOrders", fetchUser, authController.getAllOrders);
 
 export default router;
