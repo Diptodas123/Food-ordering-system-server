@@ -1,6 +1,6 @@
 import Order from "../schema/orderSchema.js";
 import Stripe from "stripe";
-
+import { Types } from "mongoose";
 const generatePayment = async (req, res) => {
     const { cartItems, deliveryCharge, discount, totalAmount } = req.body;
     try {
@@ -70,4 +70,29 @@ const placeOrder = async (req, res) => {
     }
 }
 
-export default { placeOrder, generatePayment };
+const getOrderById = async (req, res) => {
+    if (!req.user) {
+        return res.status(400).json({ success: false, message: "Please login" });
+    }
+
+    try {
+
+        let success = false;
+
+        const userId = new Types.ObjectId(req.user);
+
+        const orderDetails = await Order.findOne({ user: userId, _id: req.params.id }).populate("restaurant", "name address imgUrls");
+
+        if (!orderDetails) {
+            return res.status(404).json({ success, message: "Order not found" });
+        }
+
+        success = true;
+        return res.status(200).json({ success, orderDetails });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
+}
+
+export default { placeOrder, generatePayment, getOrderById };
