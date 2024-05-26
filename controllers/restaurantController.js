@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 import { Types } from "mongoose";
 import Review from "../schema/reviewSchema.js";
 import jwt from "jsonwebtoken";
+import Order from "../schema/orderSchema.js";
 import FoodItem from "../schema/foodItemSchema.js";
 const register = async (req, res) => {
 
@@ -192,22 +193,71 @@ const postReview = async (req, res) => {
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array()[0].msg });
     }
+
+    if (!req.user) {
+        return res.status(400).json({ message: "Please login to post review" });
+    }
+
     try {
         let success = false;
 
+        const userId = new Types.ObjectId(req.user);
         const review = await Review.create({
             restaurant: req.params.id,
-            user: req.body.user,
+            user: userId,
             comment: req.body.comment,
             rating: req.body.rating,
             image: req.body.image
         });
 
         success = true;
-        return res.status(200).json({ success, review });
+        return res.status(200).json({ success, review, message: "Review added successfully" });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: "Internal Server Error", error: error.message });
     }
 }
-export default { register, login, getRestaurant, getallRestaurants, postReview, addFoodItem, getAllFoodItems };
+
+const getTopSellingRestaurants = async (req, res) => {
+
+    try {
+        let success = false;
+
+        const topSellingRestaurants = await Order.aggregate([
+            {
+                $group: {
+                    _id: "$restaurant",
+                    count: { $sum: 1 }
+                }
+            },
+            {
+                $sort: { count: -1 }
+            },
+            {
+                $limit: 5
+            }
+        ])
+
+        if (!topSellingRestaurants) {
+            return res.status(404).json({ success, message: "Top selling restaurants not found" });
+        }
+
+        const restaurants = await Restaurant.find(
+            {
+                _id: { $in: topSellingRestaurants.map(item => item._id) }
+            },
+            { 'name': 1, '_id': 0 }
+        );
+        success = true;
+
+        return res.status(200).json({ success, restaurants });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
+}
+
+export default {
+    register, login, getRestaurant, getallRestaurants,
+    postReview, addFoodItem, getAllFoodItems, getTopSellingRestaurants,
+};

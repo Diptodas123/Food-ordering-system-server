@@ -211,6 +211,36 @@ const verifyCoupon = async (req, res) => {
     }
 }
 
+const addCoupon = async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array()[0].msg });
+    }
+
+    try {
+        let success = false;
+        const user = await User.find({});
+
+        if (!user) {
+            return res.status(404).json({ success, message: "User not found" });
+        }
+
+        const coupon = {
+            code: req.body.coupon,
+            discount: req.body.discount,
+        }
+
+        user.coupon.push(coupon);
+        await user.save();
+
+        success = true;
+        return res.status(200).json({ success, message: "Coupon added successfully" });
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
+}
+
 const getAllOrders = async (req, res) => {
     if (!req.user) {
         return res.status(400).json({ success, message: "Please login to get all orders" });
@@ -268,7 +298,7 @@ const addAddress = async (req, res) => {
 
 
 const updateAddress = async (req, res) => {
-    if(!req.user){
+    if (!req.user) {
         return res.status(400).json({ success, message: "Please login to update address" });
     }
 
@@ -342,4 +372,9 @@ const getAllAddress = async (req, res) => {
     }
 }
 
-export default { signup, login, googleAuth, updateProfile, getAllUsers, verifyCoupon, getAllOrders, addAddress, updateAddress, deleteAddress, getAllAddress };
+export default
+    {
+        signup, login, googleAuth, updateProfile,
+        getAllUsers, verifyCoupon, getAllOrders, addAddress,
+        updateAddress, deleteAddress, getAllAddress, addCoupon
+    };

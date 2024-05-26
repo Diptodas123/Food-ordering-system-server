@@ -1,7 +1,7 @@
 import express from "express";
 import { body } from "express-validator";
 import restaurantController from "../controllers/restaurantController.js";
-
+import fetchUser from "../middleware/fetchUser.js";
 const router = express.Router();
 
 router.post("/registration", [
@@ -34,7 +34,7 @@ router.get("/getallRestaurants", restaurantController.getallRestaurants);
 router.post("/postReview/:id", [
     body("comment", "Enter a valid comment").isLength({ min: 3 }),
     body("rating", "Enter a valid rating").isLength({ min: 1, max: 5 }),
-], restaurantController.postReview);
+], fetchUser, restaurantController.postReview);
 
 router.post("/addfooditem/:id", [
     body("name", "Enter a valid name").isLength({ min: 3 }),
@@ -51,5 +51,7 @@ router.post("/addfooditem/:id", [
 
 
 router.get("/getAllFoodItems", restaurantController.getAllFoodItems);
+
+router.get("/topSellingRestaurants", restaurantController.getTopSellingRestaurants);
 
 export default router;

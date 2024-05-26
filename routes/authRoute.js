@@ -48,4 +48,11 @@ router.patch("/updateAddress/:index", fetchUser, authController.updateAddress);
 router.delete("/deleteAddress/:index", fetchUser, authController.deleteAddress);
 router.get("/getAllAddress", fetchUser, authController.getAllAddress);
 
+
+//endpoint to add coupon from the admin side
+router.post("/addCoupon", [
+    body("coupon", "Enter a valid coupon code").isLength({ min: 3 }),
+    body("discount", "Enter a valid discount").isLength({ min: 1, max: 2 }),
+], authController.addCoupon);
+
 export default router;
