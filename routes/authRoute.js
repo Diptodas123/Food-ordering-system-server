@@ -29,6 +29,7 @@ router.patch("/update-profile", [
     body("password", "Password must be atleast 8 characters long").isLength({ min: 8 }),
 ], fetchUser, authController.updateProfile);
 
+//endpoint to get all users
 router.get("/getallusers", authController.getAllUsers);
 
 router.post("/verifyCoupon/:id", [
@@ -37,7 +38,7 @@ router.post("/verifyCoupon/:id", [
 
 
 // --------------------------
-//endpoints for order manupulation
+//endpoints to fetch all orders of a user
 router.get("/getAllOrders", fetchUser, authController.getAllOrders);
 
 
@@ -54,5 +55,8 @@ router.post("/addCoupon", [
     body("coupon", "Enter a valid coupon code").isLength({ min: 3 }),
     body("discount", "Enter a valid discount").isLength({ min: 1, max: 2 }),
 ], authController.addCoupon);
+
+
+router.get("/getAllCoupons", authController.getAllCoupons);
 
 export default router;

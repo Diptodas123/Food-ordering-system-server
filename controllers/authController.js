@@ -372,9 +372,24 @@ const getAllAddress = async (req, res) => {
     }
 }
 
+const getAllCoupons = async (req, res) => {
+    try {
+        const coupons = await User.findOne({}, { coupon: 1, _id: 0 });
+
+        if (!coupons) {
+            return res.status(404).json({ success: false, message: "Coupons not found" });
+        }
+
+        return res.status(200).json({ success: true, message: "All coupons", coupons });
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
+}
+
 export default
     {
         signup, login, googleAuth, updateProfile,
         getAllUsers, verifyCoupon, getAllOrders, addAddress,
-        updateAddress, deleteAddress, getAllAddress, addCoupon
+        updateAddress, deleteAddress, getAllAddress, addCoupon, getAllCoupons
     };

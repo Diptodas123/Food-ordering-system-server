@@ -137,11 +137,10 @@ const getAllOrders = async (req, res) => {
 const getTopSellingDishesByRestaurant = async (req, res) => {
     try {
 
-        const restaurantId = new Types.ObjectId(req.params.id);
         const topSellingDishesByRestaurant = await Order.aggregate([
             {
                 $match: {
-                    restaurant: restaurantId
+                    restaurant: new Types.ObjectId(req.params.id)
                 }
             },
             {
