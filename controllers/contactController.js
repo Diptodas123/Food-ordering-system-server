@@ -24,7 +24,15 @@ const postContact = async (req, res) => {
 }
 
 const getAllContacts = async (req, res) => {
-
+    try {
+        let success = false;
+        const contacts = await Contact.find({});
+        success = true;
+        return res.status(200).json({ success, contacts });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
 }
 
 export default { postContact, getAllContacts };
