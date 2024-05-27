@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        p {
+            margin: 0 0 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tfoot {
+            font-weight: bold;
+        }
+        .logo {
+            display: block;
+            margin: 0 auto 20px; /* Center the image */
+            width: 150px;
+        }
+        .signature {
+            margin-top: 20px;
+            font-style: italic;
+        }
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Invoice</h1>
+        <h2>Foodzie</h2>
+        <img src="https://firebasestorage.googleapis.com/v0/b/foodzie-bcbf4.appspot.com/o/foodzie_logo.png?alt=media&token=8ce6cfe2-8ff4-4186-8721-690d25eb7e2c" alt="Foodzie Logo" class="logo">
+        <p>Dear {{name}},</p>
+        <p>Thanks for ordering from Foodzie. Here is your bill:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each foodItems}}
+                <tr>
+                    <td>{{name}}</td>
+                    <td>{{quantity}}</td>
+                    <td>₹{{price}}</td>
+                </tr>
+                {{/each}}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="2">Total:</td>
+                    <td>₹{{totalAmount}}</td>
+                </tr>
+            </tfoot>
+        </table>
+        <p>Looking forward to seeing you again.</p>
+        <p class="signature">Foodzie Team</p>
+        <div class="footer">
+            <p>All rights reserved. © {{year}} Foodzie</p>
+        </div>
+    </div>
+</body>
+</html>

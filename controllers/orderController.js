@@ -1,6 +1,7 @@
 import Order from "../schema/orderSchema.js";
 import Stripe from "stripe";
 import { Types } from "mongoose";
+import sendBillThroughEmail from "../services/generateEmail.js";
 const generatePayment = async (req, res) => {
     const { cartItems, deliveryCharge, discount, totalAmount } = req.body;
     try {
@@ -63,6 +64,8 @@ const placeOrder = async (req, res) => {
         }
 
         success = true;
+        console.log(order._id);
+        sendBillThroughEmail(order._id);
         return res.status(200).json({ success, message: "Order placed successfully" });
     } catch (error) {
         console.log(error);
