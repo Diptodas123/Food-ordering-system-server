@@ -32,7 +32,7 @@ const sendBillThroughEmail = async (orderId) => {
             secure: true,
             auth: {
                 user: process.env.GMAIL,
-                pass: 'bmyv cjvs spxw dioq',
+                pass: process.env.APP_PASSWORD,
             }
         });
 
