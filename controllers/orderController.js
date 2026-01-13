@@ -2,6 +2,9 @@ import Order from "../schema/orderSchema.js";
 import Stripe from "stripe";
 import { Types } from "mongoose";
 import sendBillThroughEmail from "../services/generateEmail.js";
+
+// Store SSE connections for each order
+const orderConnections = new Map();
 const generatePayment = async (req, res) => {
     const { cartItems, deliveryCharge, discount, totalAmount } = req.body;
     try {
@@ -112,6 +115,15 @@ const updateOrderStatus = async (req, res) => {
         await order.save();
         success = true;
 
+        // Send SSE notification to connected clients
+        const orderIdStr = orderId.toString();
+        if (orderConnections.has(orderIdStr)) {
+            const clients = orderConnections.get(orderIdStr);
+            clients.forEach(client => {
+                client.write(`data: ${JSON.stringify({ status: order.status, timestamp: new Date() })}\n\n`);
+            });
+        }
+
         return res.status(200).json({ success, message: "Order status updated successfully", order });
     } catch (error) {
         console.log(error);
@@ -170,7 +182,59 @@ const getTopSellingDishesByRestaurant = async (req, res) => {
     }
 }
 
+// SSE endpoint for real-time order status updates
+const streamOrderStatus = async (req, res) => {
+    const orderId = req.params.id;
+
+    // Verify the order exists
+    try {
+        const order = await Order.findById(orderId);
+        if (!order) {
+            return res.status(404).json({ success: false, message: "Order not found" });
+        }
+
+        // Set headers for SSE
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.flushHeaders();
+
+        // Send initial order status
+        res.write(`data: ${JSON.stringify({ status: order.status, timestamp: new Date() })}\n\n`);
+
+        // Store this connection
+        if (!orderConnections.has(orderId)) {
+            orderConnections.set(orderId, new Set());
+        }
+        orderConnections.get(orderId).add(res);
+
+        // Send heartbeat every 30 seconds to keep connection alive
+        const heartbeatInterval = setInterval(() => {
+            res.write(`:heartbeat\n\n`);
+        }, 30000);
+
+        // Clean up on client disconnect
+        req.on('close', () => {
+            clearInterval(heartbeatInterval);
+            const clients = orderConnections.get(orderId);
+            if (clients) {
+                clients.delete(res);
+                if (clients.size === 0) {
+                    orderConnections.delete(orderId);
+                }
+            }
+            res.end();
+        });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
+}
+
 export default {
     placeOrder, generatePayment, getOrderById,
-    updateOrderStatus, getAllOrders, getTopSellingDishesByRestaurant
+    updateOrderStatus, getAllOrders, getTopSellingDishesByRestaurant,
+    streamOrderStatus
 };

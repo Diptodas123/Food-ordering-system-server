@@ -9,6 +9,8 @@ router.post("/generatePayment", orderController.generatePayment);
 
 router.get("/getOrder/:id", fetchUser, orderController.getOrderById);
 
+// SSE endpoint for real-time order status updates
+router.get("/streamOrderStatus/:id", orderController.streamOrderStatus);
 
 // endpoint to update order status from the restaurant side
 router.put("/updateOrderStatus/:id", orderController.updateOrderStatus);
